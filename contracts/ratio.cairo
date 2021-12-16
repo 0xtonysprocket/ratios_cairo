@@ -35,6 +35,7 @@ func ratio_mul{
     return (Ratio(x.n * y.n, x.d * y.d))
 end
 
+#divide x/y
 @view
 func ratio_div{
         syscall_ptr : felt*,
@@ -100,6 +101,7 @@ func ratio_nth_root{
     end
 end
 
+#recursion helper for nth root
 func _recursion_nth_root{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -134,7 +136,7 @@ func _recursion_nth_root{
     end
 end
 
-
+# helper function for nth root check if candidate is close enough
 func _less_than_error{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -158,6 +160,8 @@ func _less_than_error{
     return (0)
 end
 
+# add x + y
+@view
 func ratio_add{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -175,6 +179,8 @@ func ratio_add{
     return (sum)
 end
 
+#absolute value of base - other
+@view
 func ratio_diff{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -204,6 +210,7 @@ func ratio_diff{
     end
 end
 
+@view
 func ratio_less_than_or_eq{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
