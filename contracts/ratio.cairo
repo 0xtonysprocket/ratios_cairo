@@ -50,7 +50,7 @@ func ratio_pow{
     let (__fp__, _) = get_fp_and_pc()
 
     let rest_of_product: Ratio = ratio_pow(x, m - 1)
-    local z: Ratio = ratio_mul(x, rest_of_product)
+    let z: Ratio = ratio_mul(x, rest_of_product)
 
     return (z)
 end
