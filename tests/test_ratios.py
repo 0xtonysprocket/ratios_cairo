@@ -47,15 +47,32 @@ async def test_ratio_le_eq(ratio_factory, x, y, z, k):
     assert root.result[0] == (1 if x / y <= z / k else 0)
 
 
+@given(
+    x=st.integers(min_value=1, max_value=100),
+    y=st.integers(min_value=1, max_value=100),
+    z=st.integers(min_value=1, max_value=15),
+)
+@settings(deadline=None)
+@pytest.mark.asyncio
+async def test_ratio_pow(ratio_factory, x, y, z):
+    ratio = ratio_factory
+
+    base = (x, y)  # 3/1
+    power = z  # exponent
+
+    root = await ratio.ratio_pow(base, power).call()
+    assert root.result[0] == (x ** z, y ** z)
+
+
 """
 @pytest.mark.asyncio
 async def test_nth_root(ratio_factory):
     ratio = ratio_factory
 
-    base = (27, 1)  # 9/1
+    base = (10949289, 2903823898)  # 9/1
     root = 3  # cube root
-    error = (1, 3)  # .01
+    error = (1, 10)  # .01
 
     root = await ratio.ratio_nth_root(base, root, error).call()
     assert root.result[0] == (3, 1)
-    """
+"""

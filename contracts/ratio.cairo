@@ -45,6 +45,7 @@ func ratio_div{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 end
 
 # x^m where x is element of rationals and m is element of naturals -> element of rationals
+@view
 func ratio_pow{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         x : Ratio, m : felt) -> (z : Ratio):
     alloc_locals
