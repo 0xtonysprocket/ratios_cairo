@@ -265,7 +265,6 @@ func nth_root_by_digit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return (z)
 end
 
-@view
 func recursive_find_integer_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         x : Ratio, m : felt, guess : Ratio) -> (z : Ratio):
     # needed for dereferencing ratios
@@ -284,7 +283,6 @@ func recursive_find_integer_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     end
 end
 
-@view
 func recursive_find_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         x : Ratio, m : felt, guess : Ratio, count : felt) -> (z : Ratio):
     alloc_locals
@@ -315,7 +313,6 @@ func recursive_find_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     end
 end
 
-@view
 func find_precision_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         current_x : Ratio, m : felt, precision : felt, digit : felt, current_root : Ratio) -> (
         z : Ratio):
