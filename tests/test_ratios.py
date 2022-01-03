@@ -2,7 +2,6 @@ import pytest
 import math
 from hypothesis import given, strategies as st, settings
 
-"""
 @given(
     x=st.integers(min_value=1, max_value=10000000000000000),
     y=st.integers(min_value=1, max_value=10000000000000000),
@@ -62,17 +61,23 @@ async def test_ratio_pow(ratio_factory, x, y, z):
 
     root = await ratio.ratio_pow(base, power).call()
     assert root.result[0] == (x ** z, y ** z)
-"""
 
 
+@given(
+    x=st.integers(min_value=1, max_value=100),
+    y=st.integers(min_value=1, max_value=100),
+    m=st.integers(min_value=1, max_value=15),
+    p=st.integers(min_value=5, max_value=11),
+)
+@settings(deadline=None)
 @pytest.mark.asyncio
-async def test_nth_root(ratio_factory):
+async def test_nth_root_by_digit(ratio_factory, x, y, m, p):
     ratio = ratio_factory
 
-    base = (2134801878974, 74893271)  # 9/1
-    root = 2  # cube root
-    error = (10, 1)  # .01
+    base = (x, y)  # 9/1
+    root = m  # cube root
+    precision = p  # 5 digits
 
-    root = await ratio.ratio_nth_root(base, root, error).call()
-    print(root)
-    # assert root.result[0] == (3, 1)
+    root = await ratio.nth_root_by_digit(base, root, precision).call()
+    res = math.floor(((x / y) ** (1 / m)) * 10 ** p) / (10 ** p)
+    assert (root.result[0][0] / root.result[0][1] - res) < (5/(10**p))
