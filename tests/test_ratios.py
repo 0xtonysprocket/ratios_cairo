@@ -2,6 +2,7 @@ import pytest
 import math
 from hypothesis import given, strategies as st, settings
 
+
 @given(
     x=st.integers(min_value=1, max_value=10000000000000000),
     y=st.integers(min_value=1, max_value=10000000000000000),
@@ -64,8 +65,8 @@ async def test_ratio_pow(ratio_factory, x, y, z):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=100),
-    y=st.integers(min_value=1, max_value=100),
+    x=st.integers(min_value=1, max_value=100000000000000),
+    y=st.integers(min_value=1, max_value=100000000000000),
     m=st.integers(min_value=1, max_value=15),
     p=st.integers(min_value=5, max_value=11),
 )
@@ -74,10 +75,10 @@ async def test_ratio_pow(ratio_factory, x, y, z):
 async def test_nth_root_by_digit(ratio_factory, x, y, m, p):
     ratio = ratio_factory
 
-    base = (x, y)  # 9/1
-    root = m  # cube root
-    precision = p  # 5 digits
+    base = (x, y)  # base fraction
+    root = m  # which root
+    precision = p  # how many digits
 
     root = await ratio.nth_root_by_digit(base, root, precision).call()
     res = math.floor(((x / y) ** (1 / m)) * 10 ** p) / (10 ** p)
-    assert (root.result[0][0] / root.result[0][1] - res) < (5/(10**p))
+    assert (root.result[0][0] / root.result[0][1] - res) < (5 / (10 ** p))
