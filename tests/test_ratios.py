@@ -20,8 +20,6 @@ async def test_safe_mul(ratio_factory, a, b, s_a, s_b):
     a_exp = int(math.pow(2, a)) * s_a
     b_exp = int(math.pow(2, b)) * s_b
 
-    print(a_exp)
-    print(b_exp)
     if a + b >= 128:
         with pytest.raises(StarkException) as execInfo:
             await ratio.safe_mul(a_exp, b_exp).call()
