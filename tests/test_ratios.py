@@ -1,6 +1,42 @@
 import pytest
 import math
 from hypothesis import given, strategies as st, settings
+from starkware.starkware_utils.error_handling import StarkException, StarkErrorCode
+
+
+@given(
+    a=st.integers(min_value=2, max_value=256),
+    b=st.integers(min_value=3, max_value=256),
+    s_a=st.integers(
+        min_value=-1, max_value=1).filter(lambda x: x != 0 & x != -1),
+    s_b=st.integers(
+        min_value=-1, max_value=1).filter(lambda x: x != 0 & x != 1)
+)
+@settings(deadline=None)
+@pytest.mark.asyncio
+async def test_safe_mul(ratio_factory, a, b, s_a, s_b):
+    ratio = ratio_factory
+
+    a_exp = int(math.pow(2, a)) * s_a
+    b_exp = int(math.pow(2, b)) * s_b
+
+    print(a_exp)
+    print(b_exp)
+    if a + b >= 128:
+        with pytest.raises(StarkException) as execInfo:
+            await ratio.safe_mul(a_exp, b_exp).call()
+        print("overflow for ")
+        print("a:${a} b:${b}")
+        print("\n")
+        assert execInfo.type is StarkException
+    else:
+        product = await ratio.safe_mul(a_exp, b_exp).call()
+        print("product is ")
+        print(product.result[0])
+        print("-----")
+        print(a_exp * b_exp)
+        print("\n")
+        assert product.result[0] == a_exp * b_exp
 
 
 @given(
