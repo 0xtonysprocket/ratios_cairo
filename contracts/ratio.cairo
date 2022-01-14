@@ -3,8 +3,9 @@
 
 from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
-from starkware.cairo.common.math_cmp import is_le
-from starkware.cairo.common.math import assert_not_zero, assert_le, unsigned_div_rem
+from starkware.cairo.common.math_cmp import is_le, is_nn
+from starkware.cairo.common.math import (
+    assert_not_zero, assert_le, unsigned_div_rem, sign, abs_value)
 
 ##########
 # STRUCTS
@@ -30,7 +31,9 @@ func ratio_mul{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
-    return (Ratio(x.n * y.n, x.d * y.d))
+    let (n) = safe_mul(x.n, y.n)
+    let (d) = safe_mul(x.d, y.d)
+    return (Ratio(n, d))
 end
 
 # divide x/y
@@ -296,7 +299,7 @@ func recursive_find_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     let (local guess_to_m : Ratio) = ratio_pow(guess, m)
     let le : felt = ratio_less_than_or_eq(guess_to_m, x)
-    let r_le: felt = ratio_less_than_or_eq(x, guess_to_m)
+    let r_le : felt = ratio_less_than_or_eq(x, guess_to_m)
 
     if le == 1:
         if r_le == 1:
@@ -335,4 +338,30 @@ func find_precision_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         let z : Ratio = find_precision_part(current_x, m, precision, current_digit, current_part)
         return (z)
     end
+end
+
+# Performs a * b = p where -2^128 < a, b, p < 2^128
+# Detects overflow by checking abs(a) * abs(b) >= 0
+@view
+func safe_mul{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        a : felt, b : felt) -> (res : felt):
+    alloc_locals
+
+    let (a_sign) = sign(a)
+    let (b_sign) = sign(b)
+
+    # abs_value() assumes -2^128 < value < 2^128
+    let (abs_a) = abs_value(a)
+    let (abs_b) = abs_value(b)
+
+    # abs_value() revokes range check
+    local range_check_ptr = range_check_ptr
+
+    # The product of the absolute values of a and b will be negative if there is an overflow
+    let res = abs_a * abs_b
+    # is_nn() implicitly compares p < RANGE_BOUND hence p < 2^128
+    let (nn) = is_nn(res)
+    assert nn = 1
+
+    return (res * a_sign * b_sign)
 end
