@@ -49,8 +49,8 @@ async def test_ratio_diff(ratio_factory, x, y, z, k):
 async def test_ratio_le_eq(ratio_factory, x, y, z, k):
     ratio = ratio_factory
 
-    base = (to_uint(2), to_uint(1))  # x/y
-    other = (to_uint(3), to_uint(1))  # z/k
+    base = (to_uint(x), to_uint(y))  # x/y
+    other = (to_uint(z), to_uint(k))  # z/k
 
     root = await ratio.ratio_less_than_or_eq(base, other).call()
     print(root.result)
@@ -73,9 +73,6 @@ async def test_ratio_mul(ratio_factory, x, y, z, k):
     other = (to_uint(z), to_uint(k))  # exponent
 
     root = await ratio.ratio_mul(base, other).call()
-    print(root.result)
-    print(root.result[0])
-    print(root.result[0][0])
     assert (from_uint(root.result[0][0]), from_uint(root.result[0][1])) == (
         x * z,
         y * k,
@@ -83,8 +80,8 @@ async def test_ratio_mul(ratio_factory, x, y, z, k):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=10000000000000000),
-    y=st.integers(min_value=1, max_value=10000000000000000),
+    x=st.integers(min_value=1, max_value=100),
+    y=st.integers(min_value=1, max_value=100),
     z=st.integers(min_value=1, max_value=9),
 )
 @settings(deadline=None)
@@ -96,9 +93,6 @@ async def test_ratio_pow(ratio_factory, x, y, z):
     power = to_uint(z)  # exponent
 
     root = await ratio.ratio_pow(base, power).call()
-    print(root.result)
-    print(root.result[0])
-    print(root.result[0][0])
     assert (from_uint(root.result[0][0]), from_uint(root.result[0][1])) == (
         x ** z,
         y ** z,
@@ -106,10 +100,10 @@ async def test_ratio_pow(ratio_factory, x, y, z):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=10000000000000000),
-    y=st.integers(min_value=1, max_value=10000000000000000),
-    z=st.integers(min_value=1, max_value=10000000000000000),
-    k=st.integers(min_value=1, max_value=10000000000000000),
+    x=st.integers(min_value=1, max_value=100000000000000),
+    y=st.integers(min_value=1, max_value=100000000000000),
+    m=st.integers(min_value=1, max_value=15),
+    p=st.integers(min_value=5, max_value=11),
 )
 @settings(deadline=None)
 @pytest.mark.asyncio

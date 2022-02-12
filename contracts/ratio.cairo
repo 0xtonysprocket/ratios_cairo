@@ -49,8 +49,8 @@ func ratio_div{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
-    let n: Uint256 = uint256_mul(x.n, y.d)
-    let d: Uint256 = uint256_mul(x.d, y.n)
+    let (local n: Uint256, _) = uint256_mul(x.n, y.d)
+    let (local d: Uint256, _) = uint256_mul(x.d, y.n)
 
     return (Ratio(n, d))
 end
@@ -120,11 +120,11 @@ func ratio_add{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         end
     end
 
-    let x: Uint256 = uint256_mul(first_ratio.n, second_ratio.d)
-    let y: Uint256 = uint256_mul(second_ratio.n, first_ratio.d)
+    let (local x: Uint256, _) = uint256_mul(first_ratio.n, second_ratio.d)
+    let (local y: Uint256, _) = uint256_mul(second_ratio.n, first_ratio.d)
 
     let i: Uint256 = uint256_add(x, y)
-    let j: Uint256 = uint256_mul(first_ratio.d, second_ratio.d)
+    let (local j: Uint256, _) = uint256_mul(first_ratio.d, second_ratio.d)
     let sum : Ratio = Ratio(
         i,
         j)
@@ -135,6 +135,8 @@ end
 @view
 func ratio_diff{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         base_ratio : Ratio, other_ratio : Ratio) -> (diff : Ratio):
+    alloc_locals
+
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
@@ -153,23 +155,23 @@ func ratio_diff{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
         end
     end
 
-    let x: Uint256 = uint256_mul(other_ratio.n, base_ratio.d)
-    let y: Uint256 = uint256_mul(base_ratio.n, other_ratio.d)
+    let (local x: Uint256, _) = uint256_mul(other_ratio.n, base_ratio.d)
+    let (local y: Uint256, _) = uint256_mul(base_ratio.n, other_ratio.d)
     let r_le : felt = uint256_le(x, y)
     if r_le == 1:
-        let m: Uint256 = uint256_mul(base_ratio.n, other_ratio.d)
-        let n: Uint256 = uint256_mul(other_ratio.n, base_ratio.d)  
+        let (local m: Uint256, _) = uint256_mul(base_ratio.n, other_ratio.d)
+        let (local n: Uint256, _) = uint256_mul(other_ratio.n, base_ratio.d)  
         let o: Uint256 = uint256_sub(m, n)
-        let p: Uint256 = uint256_mul(base_ratio.d, other_ratio.d)
+        let (local p: Uint256, _) = uint256_mul(base_ratio.d, other_ratio.d)
         let diff : Ratio = Ratio(
             o,
             p)
         return (diff)
     else:
-        let i: Uint256 = uint256_mul(other_ratio.n, base_ratio.d)
-        let j: Uint256 = uint256_mul(base_ratio.n, other_ratio.d)
+        let (local i: Uint256, _) = uint256_mul(other_ratio.n, base_ratio.d)
+        let (local j: Uint256, _) = uint256_mul(base_ratio.n, other_ratio.d)
         let k: Uint256 = uint256_sub(i, j)
-        let l: Uint256 = uint256_mul(base_ratio.d, other_ratio.d)     
+        let (local l: Uint256, _) = uint256_mul(base_ratio.d, other_ratio.d)     
         let diff : Ratio = Ratio(
             k,
             l)
@@ -180,11 +182,13 @@ end
 @view
 func ratio_less_than_or_eq{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         first_ratio : Ratio, second_ratio : Ratio) -> (bool : felt):
+    alloc_locals
+
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
-    let x: Uint256 = uint256_mul(first_ratio.n, second_ratio.d)
-    let y: Uint256 = uint256_mul(second_ratio.n, first_ratio.d)
+    let (local x: Uint256, _) = uint256_mul(first_ratio.n, second_ratio.d)
+    let (local y: Uint256, _) = uint256_mul(second_ratio.n, first_ratio.d)
     let r_le : felt = uint256_le(x, y)
     if r_le == 1:
         return (1)
@@ -288,7 +292,7 @@ func find_precision_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     let current_digit : felt = digit + 1
     let base : felt = pow(10, current_digit)
-    let x: Uint256 = uint256_mul(current_root.n, Uint256(10, 0))
+    let (local x: Uint256, _) = uint256_mul(current_root.n, Uint256(10, 0))
     let w: Uint256 = uint256_add(x, Uint256(1,0))
     let initial_guess : Ratio = Ratio(w, Uint256(base, 0))
     let count : felt = 1
