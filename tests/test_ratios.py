@@ -13,7 +13,6 @@ def from_uint(uint):
     return uint[0] + (uint[1] << 128)
 
 
-"""
 @given(
     x=st.integers(min_value=1, max_value=100000),
     y=st.integers(min_value=1, max_value=100000),
@@ -98,9 +97,13 @@ async def test_ratio_pow(ratio_factory, x, y, z):
         x ** z,
         y ** z,
     )
+
+
 """
 
 """
+
+
 @given(
     x=st.integers(min_value=1, max_value=100000),
     y=st.integers(min_value=1, max_value=100000),
@@ -119,13 +122,12 @@ async def test_ratio_add(ratio_factory, x, y, z, k):
     assert (from_uint(root.result[0][0]), from_uint(root.result[0][1])) == (
         (x * k + y * z, y * k) if y != k else (x + z, y)
     )
-"""
 
 
 @given(
-    x=st.integers(min_value=4, max_value=10000),
-    y=st.integers(min_value=3, max_value=10000),
-    m=st.integers(min_value=2, max_value=7),
+    x=st.integers(min_value=1, max_value=10000),
+    y=st.integers(min_value=1, max_value=10000),
+    m=st.integers(min_value=1, max_value=7),
     p=st.integers(min_value=5, max_value=11),
 )
 @settings(deadline=None)
@@ -133,9 +135,9 @@ async def test_ratio_add(ratio_factory, x, y, z, k):
 async def test_nth_root_by_digit(ratio_factory, x, y, m, p):
     ratio = ratio_factory
 
-    base = (to_uint(2), to_uint(1))  # x/y
-    root = to_uint(2)  # which root
-    precision = 5  # how many digits
+    base = (to_uint(x), to_uint(y))  # x/y
+    root = to_uint(m)  # which root
+    precision = p  # how many digits
 
     root = await ratio.nth_root_by_digit(base, root, precision).call()
     res = math.floor(((x / y) ** (1 / m)) * 10 ** p) / (10 ** p)
