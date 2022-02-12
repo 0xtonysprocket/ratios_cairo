@@ -14,10 +14,10 @@ def from_uint(uint):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=10000000000000000),
-    y=st.integers(min_value=1, max_value=10000000000000000),
-    z=st.integers(min_value=1, max_value=10000000000000000),
-    k=st.integers(min_value=1, max_value=10000000000000000),
+    x=st.integers(min_value=1, max_value=100000),
+    y=st.integers(min_value=1, max_value=100000),
+    z=st.integers(min_value=1, max_value=100000),
+    k=st.integers(min_value=1, max_value=100000),
 )
 @settings(deadline=None)
 @pytest.mark.asyncio
@@ -39,10 +39,10 @@ async def test_ratio_diff(ratio_factory, x, y, z, k):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=10000000000000000),
-    y=st.integers(min_value=1, max_value=10000000000000000),
-    z=st.integers(min_value=1, max_value=10000000000000000),
-    k=st.integers(min_value=1, max_value=10000000000000000),
+    x=st.integers(min_value=1, max_value=100000),
+    y=st.integers(min_value=1, max_value=100000),
+    z=st.integers(min_value=1, max_value=100000),
+    k=st.integers(min_value=1, max_value=100000),
 )
 @settings(deadline=None)
 @pytest.mark.asyncio
@@ -59,10 +59,10 @@ async def test_ratio_le_eq(ratio_factory, x, y, z, k):
 
 
 @given(
-    x=st.integers(min_value=1, max_value=10000000000000000),
-    y=st.integers(min_value=1, max_value=10000000000000000),
-    z=st.integers(min_value=1, max_value=10000000000000000),
-    k=st.integers(min_value=1, max_value=10000000000000000),
+    x=st.integers(min_value=1, max_value=100000),
+    y=st.integers(min_value=1, max_value=100000),
+    z=st.integers(min_value=1, max_value=100000),
+    k=st.integers(min_value=1, max_value=100000),
 )
 @settings(deadline=None)
 @pytest.mark.asyncio
@@ -99,10 +99,35 @@ async def test_ratio_pow(ratio_factory, x, y, z):
     )
 
 
+"""
+
+"""
+
+
 @given(
-    x=st.integers(min_value=1, max_value=100000000000000),
-    y=st.integers(min_value=1, max_value=100000000000000),
-    m=st.integers(min_value=1, max_value=15),
+    x=st.integers(min_value=1, max_value=100000),
+    y=st.integers(min_value=1, max_value=100000),
+    z=st.integers(min_value=1, max_value=100000),
+    k=st.integers(min_value=1, max_value=100000),
+)
+@settings(deadline=None)
+@pytest.mark.asyncio
+async def test_ratio_add(ratio_factory, x, y, z, k):
+    ratio = ratio_factory
+
+    base = (to_uint(x), to_uint(y))  # x/y
+    other = (to_uint(z), to_uint(k))  # exponent
+
+    root = await ratio.ratio_add(base, other).call()
+    assert (from_uint(root.result[0][0]), from_uint(root.result[0][1])) == (
+        (x * k + y * z, y * k) if y != k else (x + z, y)
+    )
+
+
+@given(
+    x=st.integers(min_value=1, max_value=10000),
+    y=st.integers(min_value=1, max_value=10000),
+    m=st.integers(min_value=1, max_value=7),
     p=st.integers(min_value=5, max_value=11),
 )
 @settings(deadline=None)
