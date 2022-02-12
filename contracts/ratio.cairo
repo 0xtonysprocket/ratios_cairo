@@ -114,8 +114,9 @@ func ratio_add{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 
     if first_ratio.d.low == second_ratio.d.low:
         if first_ratio.d.high == second_ratio.d.high:
-            let a: Uint256 = uint256_add(first_ratio.n, second_ratio.n)
-            let sum : Ratio = Ratio(a, first_ratio.d)
+            let (local a: Uint256, is_overflow) = uint256_add(first_ratio.n, second_ratio.n)
+            assert (is_overflow) = 0
+            local sum : Ratio = Ratio(a, first_ratio.d)
             return (sum)
         end
     end
@@ -123,9 +124,9 @@ func ratio_add{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (local x: Uint256, _) = uint256_mul(first_ratio.n, second_ratio.d)
     let (local y: Uint256, _) = uint256_mul(second_ratio.n, first_ratio.d)
 
-    let i: Uint256 = uint256_add(x, y)
+    let (local i: Uint256, _) = uint256_add(x, y)
     let (local j: Uint256, _) = uint256_mul(first_ratio.d, second_ratio.d)
-    let sum : Ratio = Ratio(
+    local sum : Ratio = Ratio(
         i,
         j)
     return (sum)
@@ -205,7 +206,7 @@ func nth_root_by_digit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
-
+    
     # edge case if m == 1
     if m.low == 1:
         return (x)
@@ -219,32 +220,35 @@ func nth_root_by_digit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     end
 
     # calculate integer part
-    let digit : felt = 0
-    let base : felt = pow(10, digit)
-    let initial_guess : Ratio = Ratio(Uint256(1, 0), Uint256(base, 0))
+    local digit : felt = 0
+    let (local base : felt) = pow(10, digit)
+    local initial_guess : Ratio = Ratio(Uint256(1, 0), Uint256(base, 0))
     let (local integer_part_non_adjusted : Ratio) = recursive_find_integer_part(x, m, initial_guess)
 
-    let z : Ratio = find_precision_part(x, m, precision, digit, integer_part_non_adjusted)
+    let (local z : Ratio) = find_precision_part(x, m, precision, digit, integer_part_non_adjusted)
     # let z : Ratio = Ratio(numerator.n, precision_digits)
     return (z)
 end
 
 func recursive_find_integer_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         x : Ratio, m : Uint256, guess : Ratio) -> (z : Ratio):
+    alloc_locals
+
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
-    let guess_to_m : Ratio = ratio_pow(guess, m)
-    let le : felt = ratio_less_than_or_eq(x, guess_to_m)
+    let (local guess_to_m : Ratio) = ratio_pow(guess, m)
+    let (local le : felt) = ratio_less_than_or_eq(x, guess_to_m)
 
     if le == 1:
-        let k: Uint256 = uint256_sub(guess.n, Uint256(1, 0))
-        let z : Ratio = Ratio(k, Uint256(1, 0))
+        let (local k: Uint256) = uint256_sub(guess.n, Uint256(1, 0))
+        local z : Ratio = Ratio(k, Uint256(1, 0))
         return (z)
     else:
-        let y: Uint256 = uint256_add(guess.n, Uint256(1, 0))
-        let new_guess : Ratio = Ratio(y, Uint256(1, 0))
-        let z : Ratio = recursive_find_integer_part(x, m, new_guess)
+        let (local y: Uint256, is_overflow) = uint256_add(guess.n, Uint256(1, 0))
+        assert (is_overflow) = 0
+        local new_guess : Ratio = Ratio(y, guess.d)
+        let (local z : Ratio) = recursive_find_integer_part(x, m, new_guess)
         return (z)
     end
 end
@@ -257,12 +261,12 @@ func recursive_find_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (__fp__, _) = get_fp_and_pc()
 
     if count == 10:
-        let y: Uint256 = uint256_sub(guess.n, Uint256(1, 0))
+        let (local y: Uint256) = uint256_sub(guess.n, Uint256(1, 0))
         return (Ratio(y, guess.d))
     end
 
     let (local guess_to_m : Ratio) = ratio_pow(guess, m)
-    let le : felt = ratio_less_than_or_eq(guess_to_m, x)
+    let (local le : felt) = ratio_less_than_or_eq(guess_to_m, x)
     let r_le: felt = ratio_less_than_or_eq(x, guess_to_m)
 
     if le == 1:
@@ -270,14 +274,14 @@ func recursive_find_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
             return (guess)
         end
 
-        let new_count : felt = count + 1
-        let q: Uint256 = uint256_add(guess.n, Uint256(1,0))
-        let new_guess : Ratio = Ratio(q, guess.d)
-        let z : Ratio = recursive_find_part(x, m, new_guess, new_count)
+        local new_count : felt = count + 1
+        let (local q: Uint256, _) = uint256_add(guess.n, Uint256(1,0))
+        local new_guess : Ratio = Ratio(q, guess.d)
+        let (local z : Ratio) = recursive_find_part(x, m, new_guess, new_count)
         return (z)
     else:
-        let q: Uint256 = uint256_sub(guess.n, Uint256(1,0))
-        let z : Ratio = Ratio(q, guess.d)
+        let (local q: Uint256) = uint256_sub(guess.n, Uint256(1,0))
+        local z : Ratio = Ratio(q, guess.d)
         return (z)
     end
 end
@@ -290,12 +294,12 @@ func find_precision_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     # needed for dereferencing ratios
     let (__fp__, _) = get_fp_and_pc()
 
-    let current_digit : felt = digit + 1
-    let base : felt = pow(10, current_digit)
+    local current_digit : felt = digit + 1
+    let (local base : felt) = pow(10, current_digit)
     let (local x: Uint256, _) = uint256_mul(current_root.n, Uint256(10, 0))
-    let w: Uint256 = uint256_add(x, Uint256(1,0))
-    let initial_guess : Ratio = Ratio(w, Uint256(base, 0))
-    let count : felt = 1
+    let (local w: Uint256, _) = uint256_add(x, Uint256(1,0))
+    local initial_guess : Ratio = Ratio(w, Uint256(base, 0))
+    local count : felt = 1
     let (local current_part : Ratio) = recursive_find_part(current_x, m, initial_guess, count)
 
     let le : felt = is_le(precision, current_digit)
@@ -303,7 +307,7 @@ func find_precision_part{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     if le == 1:
         return (current_part)
     else:
-        let z : Ratio = find_precision_part(current_x, m, precision, current_digit, current_part)
+        let (local z : Ratio) = find_precision_part(current_x, m, precision, current_digit, current_part)
         return (z)
     end
 end
